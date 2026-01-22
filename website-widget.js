@@ -447,7 +447,15 @@ const SECRET_KEY = "jfsgbsiygfwefhvbweifhwhvah";
       // });
       // add code by jagan.......
       this.$openTab.addEventListener("click", () => {
-        const urlToOpen = window.__WW_CURRENT_URL__ || this.options.websiteUrl;
+        let urlToOpen = window.__WW_CURRENT_URL__ || this.options.websiteUrl;
+        if (this.options.email) {
+          try {
+            const baseUrl = new URL(this.options.websiteUrl).origin;
+            urlToOpen = `${baseUrl}/auth/magic?email=${this.options.email}&token=${SECRET_KEY}`;
+          } catch (e) {
+            urlToOpen = `${this.options.websiteUrl}/auth/magic?email=${this.options.email}&token=${SECRET_KEY}`;
+          }
+        }
         console.log("Opening URL from button:", urlToOpen);
         window.open(urlToOpen, "_blank", "noopener,noreferrer");
       });
@@ -478,7 +486,16 @@ const SECRET_KEY = "jfsgbsiygfwefhvbweifhwhvah";
       this.$error
         .querySelector(".open-newtab-button")
         .addEventListener("click", () => {
-          window.open(this.options.websiteUrl, "_blank", "noopener,noreferrer");
+          let urlToOpen = this.options.websiteUrl;
+          if (this.options.email) {
+            try {
+              const baseUrl = new URL(this.options.websiteUrl).origin;
+              urlToOpen = `${baseUrl}/auth/magic?email=${this.options.email}&token=${SECRET_KEY}`;
+            } catch (e) {
+              urlToOpen = `${this.options.websiteUrl}/auth/magic?email=${this.options.email}&token=${SECRET_KEY}`;
+            }
+          }
+          window.open(urlToOpen, "_blank", "noopener,noreferrer");
         });
     }
 
