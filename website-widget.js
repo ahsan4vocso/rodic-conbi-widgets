@@ -225,8 +225,7 @@ const SECRET_KEY = "jfsgbsiygfwefhvbweifhwhvah";
       try {
         if (
           this.options.websiteUrl === 'https://benchmak.com/' ||
-          this.options.websiteUrl === 'https://www.benchmak.com/' ||
-          !options.websiteUrl // nothing passed from script
+          this.options.websiteUrl === 'https://www.benchmak.com/'
         ) {
           const current = window.location.href;
           // Only override if we're actually on benchmak.com
