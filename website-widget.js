@@ -122,7 +122,7 @@ const SECRET_KEY = "jfsgbsiygfwefhvbweifhwhvah";
 
   // ---- Utilities ---------------------------------------------------------------
   const DEFAULTS = {
-    websiteUrl: "https://example.com",
+    websiteUrl: "https://ria.rodichub.com",
     position: "bottom-left", // 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right'
     title: null, // if null, derived from URL
     subtitle: "Browse and explore",
