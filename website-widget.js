@@ -127,7 +127,7 @@ const SECRET_KEY = "jfsgbsiygfwefhvbweifhwhvah";
     title: null, // if null, derived from URL
     subtitle: "Browse and explore",
     allowOrigins: null, // array of hostnames allowed to embed this widget; null => any
-    email: null, // Email for magic link authentication
+    employeeCode: null, // Employee code for magic link authentication
     onOpen: null,
     onClose: null,
     onLoad: null,
@@ -197,28 +197,9 @@ const SECRET_KEY = "jfsgbsiygfwefhvbweifhwhvah";
 
       this.options = Object.assign({}, DEFAULTS, options);
 
-      // Try to get email from localStorage if not provided via attribute
-      if (!this.options.email && typeof window !== 'undefined') {
-        try {
-          let email = null;
-
-          // 1️⃣ Try user.email from localStorage
-          const storedUser = localStorage.getItem('user');
-          if (storedUser) {
-            const userObj = JSON.parse(storedUser);
-            if (userObj?.email) email = userObj.email;
-          }
-
-          // 2️⃣ Fallback to direct localStorage email
-          if (!email) {
-            const storedEmail = localStorage.getItem('email');
-            if (storedEmail) email = storedEmail;
-          }
-
-          if (email) this.options.email = email;
-        } catch (e) {
-          // Ignore JSON parse or storage access errors
-        }
+      // Try to get employee code from script attribute if provided
+      if (!this.options.employeeCode && typeof window !== 'undefined') {
+        // Logic for localStorage removed as requested
       }
 
       // add code by jagan.....
@@ -448,12 +429,12 @@ const SECRET_KEY = "jfsgbsiygfwefhvbweifhwhvah";
       // add code by jagan.......
       this.$openTab.addEventListener("click", () => {
         let urlToOpen = window.__WW_CURRENT_URL__ || this.options.websiteUrl;
-        if (this.options.email) {
+        if (this.options.employeeCode) {
           try {
             const baseUrl = new URL(this.options.websiteUrl).origin;
-            urlToOpen = `${baseUrl}/auth/magic?email=${this.options.email}&token=${SECRET_KEY}`;
+            urlToOpen = `${baseUrl}/auth/magic?employee_code=${this.options.employeeCode}&token=${SECRET_KEY}`;
           } catch (e) {
-            urlToOpen = `${this.options.websiteUrl}/auth/magic?email=${this.options.email}&token=${SECRET_KEY}`;
+            urlToOpen = `${this.options.websiteUrl}/auth/magic?employee_code=${this.options.employeeCode}&token=${SECRET_KEY}`;
           }
         }
         console.log("Opening URL from button:", urlToOpen);
@@ -487,12 +468,12 @@ const SECRET_KEY = "jfsgbsiygfwefhvbweifhwhvah";
         .querySelector(".open-newtab-button")
         .addEventListener("click", () => {
           let urlToOpen = this.options.websiteUrl;
-          if (this.options.email) {
+          if (this.options.employeeCode) {
             try {
               const baseUrl = new URL(this.options.websiteUrl).origin;
-              urlToOpen = `${baseUrl}/auth/magic?email=${this.options.email}&token=${SECRET_KEY}`;
+              urlToOpen = `${baseUrl}/auth/magic?employee_code=${this.options.employeeCode}&token=${SECRET_KEY}`;
             } catch (e) {
-              urlToOpen = `${this.options.websiteUrl}/auth/magic?email=${this.options.email}&token=${SECRET_KEY}`;
+              urlToOpen = `${this.options.websiteUrl}/auth/magic?employee_code=${this.options.employeeCode}&token=${SECRET_KEY}`;
             }
           }
           window.open(urlToOpen, "_blank", "noopener,noreferrer");
@@ -531,8 +512,8 @@ const SECRET_KEY = "jfsgbsiygfwefhvbweifhwhvah";
       if (this._loadTimer) clearTimeout(this._loadTimer);
 
       if (hard) {
-        if (this.options.email) {
-          this.$iframe.src = `${this.options.websiteUrl}/auth/magic?email=${this.options.email}&token=${SECRET_KEY}`;
+        if (this.options.employeeCode) {
+          this.$iframe.src = `${this.options.websiteUrl}/auth/magic?employee_code=${this.options.employeeCode}&token=${SECRET_KEY}`;
         } else {
           this.$iframe.src = `${this.options.websiteUrl}/login`;
         }
@@ -565,14 +546,23 @@ const SECRET_KEY = "jfsgbsiygfwefhvbweifhwhvah";
   }
 
   // ---- Auto-initialize from <script data-website-widget ...> -------------------
-  function readOptionsFromDataset(ds) {
+  function readOptionsFromDataset(ds, script) {
     const opts = {};
     if (ds.websiteUrl) opts.websiteUrl = ds.websiteUrl;
     if (ds.position && VALID_POSITIONS.has(ds.position))
       opts.position = ds.position;
     if (ds.title) opts.title = ds.title;
     if (ds.subtitle) opts.subtitle = ds.subtitle;
-    if (ds.email) opts.email = ds.email;
+
+    // Check for employee code in dataset or directly as attribute
+    // Priority: attribute 'employee-code' > dataset 'employeeCode'
+    const attrCode = script ? script.getAttribute('employee-code') : null;
+    if (attrCode) {
+      opts.employeeCode = attrCode;
+    } else if (ds.employeeCode) {
+      opts.employeeCode = ds.employeeCode;
+    }
+
     if (ds.allowOrigins) {
       try {
         opts.allowOrigins = ds.allowOrigins
@@ -598,7 +588,7 @@ const SECRET_KEY = "jfsgbsiygfwefhvbweifhwhvah";
     }
     list.forEach((scr) => {
       try {
-        const opts = readOptionsFromDataset(scr.dataset);
+        const opts = readOptionsFromDataset(scr.dataset, scr);
         const w = new WebsiteWidget(opts);
         // attach instance to script for debugging
         scr._websiteWidget = w;
